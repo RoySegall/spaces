@@ -9,7 +9,12 @@
  * Implements hook_init().
  */
 function spaces_init() {
-  $space = spaces_create();
+  $debug = FALSE;
+  if ($debug) {
+    $space = spaces_load(4);
+    $settings = $space->getParentSettings();
+    dpm($settings);
+  }
 }
 
 /**
@@ -22,9 +27,11 @@ function spaces_entity_info() {
       'controller class' => 'EntityAPIController',
       'entity class' => 'Space',
       'base table' => 'space',
+      'fieldable' => TRUE,
       'entity keys' => array(
         'id' => 'id',
         'label' => 'title',
+        'bundle' => 'type',
       ),
       'bundle keys' => array(
         'bundle' => 'type',
@@ -37,7 +44,26 @@ function spaces_entity_info() {
 
 /**
  * Create a base object of the space app entity.
+ *
+ *  @return Space
  */
 function spaces_create() {
   return entity_create('space', array());
+}
+
+/**
+ * Loading a single spaces instance.
+ *
+ *  @return Space
+ */
+function spaces_load($id) {
+  $spaces = spaces_load_multiple(array($id));
+  return reset($spaces);
+}
+
+/**
+ * Loading multiple spaces instances.
+ */
+function spaces_load_multiple($ids) {
+  return entity_load('space', $ids);
 }

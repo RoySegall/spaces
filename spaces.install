@@ -26,6 +26,13 @@ function spaces_schema() {
         'length' => 255,
         'not null' => TRUE,
       ),
+      'type' => array(
+        'description' => 'The type of the sub theme.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default bundle' => 'space',
+      ),
       'global' => array(
         'description' => 'Determine if this is a global app.',
         'type' => 'int',
