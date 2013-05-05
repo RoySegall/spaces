@@ -4,3 +4,61 @@
  * @file
  * Install file for the spaces module.
  */
+
+/**
+ * Implements hook_schema().
+ */
+function spaces_schema() {
+  $schema = array();
+
+  $schema['spaces_app'] = array(
+    'description' => 'Spaces app base table.',
+    'fields' => array(
+      'id' => array(
+        'description' => 'The space ID.',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'global' => array(
+        'description' => 'Determine if this is a global app.',
+        'type' => 'int',
+        'length' => 1,
+        'not null' => TRUE,
+      ),
+      'parent_space' => array(
+        'description' => 'The parent space app ID for extending the app settings.',
+        'type' => 'int',
+        'length' => 32,
+        'not null' => TRUE,
+      ),
+      'settings' => array(
+        'description' => 'Timestamp when the entry was created.',
+        'type' => 'text',
+        'serialize' => TRUE,
+      ),
+      'private' => array(
+        'description' => 'Determine if the space app is private.',
+        'type' => 'int',
+        'default' => 0,
+      ),
+      'entity_id' => array(
+        'description' => "The entity ID the app space is referenced to.",
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'entity_type' => array(
+        'description' => "The entity type (e.g. node, comment, etc') the app space is referenced to.",
+        'type' => 'varchar',
+        'length' => '32',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
