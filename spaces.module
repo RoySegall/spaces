@@ -17,11 +17,11 @@ function spaces_init() {
  */
 function spaces_entity_info() {
   $return = array(
-    'space_app' => array(
-      'label' => t('Space app'),
+    'space' => array(
+      'label' => t('Space'),
       'controller class' => 'EntityAPIController',
-      'entity class' => 'SpaceApp',
-      'base table' => 'spaces_app',
+      'entity class' => 'Space',
+      'base table' => 'space',
       'entity keys' => array(
         'id' => 'id',
         'label' => 'title',

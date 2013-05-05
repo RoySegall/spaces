@@ -11,7 +11,7 @@
 function spaces_schema() {
   $schema = array();
 
-  $schema['spaces_app'] = array(
+  $schema['space'] = array(
     'description' => 'Spaces app base table.',
     'fields' => array(
       'id' => array(

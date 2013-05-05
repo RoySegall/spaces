@@ -5,7 +5,7 @@
  * The file holds the spaces app entity class.
  */
 
-class SpaceApp extends Entity {
+class Space extends Entity {
 
   var $global = FALSE;
   var $parent_space = 0;
