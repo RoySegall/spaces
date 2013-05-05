@@ -21,23 +21,22 @@ function spaces_schema() {
         'not null' => TRUE,
       ),
       'title' => array(
-        'description' => 'The title of the sub theme.',
+        'description' => 'The title of the space.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
       ),
       'type' => array(
-        'description' => 'The type of the sub theme.',
+        'description' => 'The type of the space.',
         'type' => 'varchar',
         'length' => 32,
-        'not null' => TRUE,
-        'default bundle' => 'space',
+        'default' => 'space',
       ),
       'global' => array(
         'description' => 'Determine if this is a global app.',
         'type' => 'int',
         'length' => 1,
-        'not null' => TRUE,
+        'default' => 0,
       ),
       'parent_space' => array(
         'description' => 'The parent space app ID for extending the app settings.',
@@ -46,7 +45,7 @@ function spaces_schema() {
         'not null' => TRUE,
       ),
       'settings' => array(
-        'description' => 'Timestamp when the entry was created.',
+        'description' => 'Holds the space settings.',
         'type' => 'text',
         'serialize' => TRUE,
       ),

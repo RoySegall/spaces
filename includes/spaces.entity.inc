@@ -7,14 +7,59 @@
 
 class Space extends Entity {
 
+  /**
+   * @var int
+   * The space ID.
+   */
   var $id = 0;
+
+  /**
+   * @var string
+   * The title of the space
+   */
   var $title = '';
+
+  /**
+   * @var string
+   * The type of the space.
+   */
   var $type = 'space';
+
+  /**
+   * @var bool
+   * Determine if this is a global app.
+   */
   var $global = FALSE;
+
+  /**
+   * @var int
+   * The parent space app ID for extending the app settings.
+   */
   var $parent_space = 0;
+
+  /**
+   * @var int
+   * The entity ID the app space is referenced to.
+   */
   var $entity_id = 0;
+
+  /**
+   * @var string
+   * The entity type (e.g. node, comment, etc') the app space is referenced to.
+   */
   var $entity_type = 'node';
+
+  /**
+   * @var array
+   * Holds the space settings.
+   */
   var $settings = array();
+
+  /**
+   * @var
+   * Determine if the space app is private.
+   */
+  var $private;
 
   /**
    * Get the settings for a specific app.
