@@ -38,6 +38,18 @@ class Space extends Entity {
   var $parent_space = 0;
 
   /**
+   * @var array
+   * Holds the space settings.
+   */
+  var $settings = array();
+
+  /**
+   * @var bool
+   * Determine if the space app is private.
+   */
+  var $private = FALSE;
+
+  /**
    * @var int
    * The entity ID the app space is referenced to.
    */
@@ -50,21 +62,14 @@ class Space extends Entity {
   var $entity_type = 'node';
 
   /**
-   * @var array
-   * Holds the space settings.
-   */
-  var $settings = array();
-
-  /**
-   * @var
-   * Determine if the space app is private.
-   */
-  var $private;
-
-  /**
    * Get the settings for a specific app.
+   *
+   * @param $id
+   *  The parent space ID.
+   * @return
+   *  The nested value of the settings.
    */
-  function getParentSettings($id = NULL) {
+  function getSettings($id = NULL) {
     if ($id) {
       // Load the parent space settings and merge them with the current one.
       $parent_space = spaces_load($id);
@@ -72,13 +77,14 @@ class Space extends Entity {
 
       if ($parent_space->parent_space) {
         // Getting the parent space settings.
-        $this->getParentSettings($parent_space->parent_space);
+        $this->getSettings($parent_space->parent_space);
       }
     }
 
-    // First time we entered this function, load the parent settings recursively.
+    // First time we entered this function, load the parent settings
+    // recursively.
     if (!$id && $this->parent_space) {
-      $this->getParentSettings($this->parent_space);
+      $this->getSettings($this->parent_space);
     }
 
     return $this->settings;
