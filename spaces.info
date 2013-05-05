@@ -1,0 +1,7 @@
+name = "Spaces"
+description = "Provides a customizable spaces layer on top of Drupal."
+package = "Spaces"
+
+core = 7.x
+dependencies[] = "entity"
+dependencies[] = "og"
