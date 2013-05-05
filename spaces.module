@@ -22,22 +22,7 @@ function spaces_init() {
 
   $menu = menu_get_item();
   if (!empty($menu['load_functions']) && $menu['load_functions'][1] == 'node_load') {
-    $wrapper = entity_metadata_wrapper('node', $menu['original_map'][1]);
-
-    // Load all the spaces for the node the user watching.
-    $query = new entityFieldQuery();
-    $result = $query
-      ->entityCondition('entity_type', 'space')
-      ->propertyCondition('entity_id', $wrapper->getIdentifier())
-      ->propertyCondition('entity_type', $wrapper->type())
-      ->propertyCondition('type', $wrapper->getBundle())
-      ->execute();
-
-    if (empty($result['space'])) {
-      return;
-    }
-
-    $spaces = spaces_load_multiple(array_keys($result['space']));
+    $spaces = spaces_load_entity_spaces('node', $menu['original_map'][1]);
 
     foreach ($spaces as $space) {
       // Overriding the $conf values with the space values.
@@ -106,4 +91,34 @@ function spaces_load($id) {
  */
 function spaces_load_multiple($ids) {
   return entity_load('space', $ids);
+}
+
+/**
+ * Loading spaces referenced to an entity.
+ *
+ * @param $entity_type
+ *  The entity type.
+ * @param $data
+ *  The entity object or identifier.
+ *
+ * @return
+ *  All the referenced spaces.
+ */
+function spaces_load_entity_spaces($entity_type, $data) {
+  $wrapper = entity_metadata_wrapper($entity_type, $data);
+
+  // Load all the spaces for the node the user watching.
+  $query = new entityFieldQuery();
+  $result = $query
+    ->entityCondition('entity_type', 'space')
+    ->propertyCondition('entity_id', $wrapper->getIdentifier())
+    ->propertyCondition('entity_type', $wrapper->type())
+    ->propertyCondition('type', $wrapper->getBundle())
+    ->execute();
+
+  if (empty($result['space'])) {
+    return array();
+  }
+
+  return spaces_load_multiple(array_keys($result['space']));
 }
