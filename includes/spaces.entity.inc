@@ -7,6 +7,7 @@
 
 class Space extends Entity {
 
+  var $id = 0;
   var $global = FALSE;
   var $parent_space = 0;
   var $entity_id = 0;

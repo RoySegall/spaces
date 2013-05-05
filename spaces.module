@@ -39,5 +39,5 @@ function spaces_entity_info() {
  * Create a base object of the space app entity.
  */
 function spaces_create() {
-  return entity_create('space_app', array('id' => 0));
+  return entity_create('space', array());
 }
