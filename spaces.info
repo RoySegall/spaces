@@ -5,3 +5,5 @@ package = "Spaces"
 core = 7.x
 dependencies[] = "entity"
 dependencies[] = "og"
+
+files[] = includes/spaces.entity.inc

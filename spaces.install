@@ -20,6 +20,12 @@ function spaces_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
+      'title' => array(
+        'description' => 'The title of the sub theme.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
       'global' => array(
         'description' => 'Determine if this is a global app.',
         'type' => 'int',

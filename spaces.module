@@ -4,3 +4,40 @@
  * @file
  * Main functionality file for the spaces module.
  */
+
+/**
+ * Implements hook_init().
+ */
+function spaces_init() {
+  $space = spaces_create();
+}
+
+/**
+ * Implements hook_entity_info().
+ */
+function spaces_entity_info() {
+  $return = array(
+    'space_app' => array(
+      'label' => t('Space app'),
+      'controller class' => 'EntityAPIController',
+      'entity class' => 'SpaceApp',
+      'base table' => 'spaces_app',
+      'entity keys' => array(
+        'id' => 'id',
+        'label' => 'title',
+      ),
+      'bundle keys' => array(
+        'bundle' => 'type',
+      ),
+    ),
+  );
+
+  return $return;
+}
+
+/**
+ * Create a base object of the space app entity.
+ */
+function spaces_create() {
+  return entity_create('space_app', array('id' => 0));
+}
