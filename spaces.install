@@ -39,7 +39,7 @@ function spaces_schema() {
         'default' => 0,
       ),
       'parent_space' => array(
-        'description' => 'The parent space app ID for extending the app settings.',
+        'description' => 'The parent space ID for extending the app settings.',
         'type' => 'int',
         'length' => 32,
         'not null' => TRUE,
@@ -49,13 +49,13 @@ function spaces_schema() {
         'type' => 'text',
         'serialize' => TRUE,
       ),
-      'private' => array(
-        'description' => 'Determine if the space app is private.',
+      'status' => array(
+        'description' => 'Determine if the space is disabled(0), enabled(1) or private(2).',
         'type' => 'int',
         'default' => 0,
       ),
       'entity_id' => array(
-        'description' => "The entity ID the app space is referenced to.",
+        'description' => "The entity ID the space is referenced to.",
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,

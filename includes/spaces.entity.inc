@@ -27,13 +27,13 @@ class Space extends Entity {
 
   /**
    * @var bool
-   * Determine if this is a global app.
+   * Determine if this is a global.
    */
   var $global = FALSE;
 
   /**
    * @var int
-   * The parent space app ID for extending the app settings.
+   * The parent space ID for extending the settings.
    */
   var $parent_space = 0;
 
@@ -45,19 +45,19 @@ class Space extends Entity {
 
   /**
    * @var bool
-   * Determine if the space app is private.
+   * Determine if the space is disabled(0), enabled(1) or private(2).
    */
-  var $private = FALSE;
+  var $status = FALSE;
 
   /**
    * @var int
-   * The entity ID the app space is referenced to.
+   * The entity ID the space is referenced to.
    */
   var $entity_id = 0;
 
   /**
    * @var string
-   * The entity type (e.g. node, comment, etc') the app space is referenced to.
+   * The entity type (e.g. node, comment, etc') the space is referenced to.
    */
   var $entity_type = 'node';
 

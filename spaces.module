@@ -114,6 +114,7 @@ function spaces_load_entity_spaces($entity_type, $data) {
     ->propertyCondition('entity_id', $wrapper->getIdentifier())
     ->propertyCondition('entity_type', $wrapper->type())
     ->propertyCondition('type', $wrapper->getBundle())
+    ->propertyCondition('status', 1)
     ->execute();
 
   if (empty($result['space'])) {
