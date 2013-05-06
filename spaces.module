@@ -29,6 +29,120 @@ function spaces_init() {
       $conf = drupal_array_merge_deep($conf, $space->settings['variables']);
     }
   }
+
+  // Get the context.
+  spaces_context();
+}
+
+/**
+ * Implements hook_menu().
+ */
+function spaces_menu() {
+  $items = array();
+
+  return $items;
+}
+
+/**
+ * Implements hook_permission().
+ */
+function spaces_permission() {
+  return array(
+    'foo' => array(
+      'title' => t('Bar'),
+      'description' => t('bar'),
+    ),
+  );
+}
+
+/**
+ * Get the current context.
+ */
+function spaces_context() {
+  $context = &drupal_static(__FUNCTION__, FALSE);
+
+  if (!empty($context)) {
+    return $context;
+  }
+
+  $context = spaces_determine_context();
+
+  return spaces_get_spaces_style($context);
+}
+
+/**
+ * Determine the context of the current space.
+ *
+ * @param $item
+ *   Optional; A menu item that context should be extracted from. If empty
+ *   defaults to the current menu item by using menu_get_item().
+ */
+function spaces_determine_context($item = NULL) {
+  if (!$item) {
+    $item = menu_get_item();
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_api().
+ */
+function spaces_ctools_plugin_api($module, $api) {
+  if ($module == 'spaces' && $api == 'spaces_app') {
+    return array('version' => 1);
+  }
+}
+
+/**
+ * Implements hook_ctools_plugin_type().
+ */
+function spaces_ctools_plugin_type() {
+  $plugins['spaces_app'] = array(
+    'classes' => array('class'),
+    'process' => 'spaces_plugin_process',
+  );
+  return $plugins;
+}
+
+/**
+ * Add defaults values to the notifier plugins.
+ *
+ * - 'description': The description of the plugin.
+ */
+function spaces_plugin_process(&$plugin, $info) {
+  $plugin += array(
+    'description' => '',
+    'options' => array(),
+  );
+}
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function spaces_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'spaces') {
+    return 'plugins/' . $plugin;
+  }
+}
+
+/**
+ * Helper function to include CTools plugins and get a notifier plugin.
+ *
+ * @param $plugin_name
+ *   The plugin that should be loaded.
+ *
+ * @return array
+ */
+function spaces_get_spaces_style($style_name) {
+  ctools_include('plugins');
+  return ctools_get_plugins('spaces', 'spaces_app', $style_name);
+}
+
+/**
+ * Helper function to include CTools plugins and get all notifier plugins.
+ */
+function spaces_get_spaces_styles() {
+  ctools_include('plugins');
+  return ctools_get_plugins('spaces', 'spaces_app');
 }
 
 /**
@@ -114,7 +228,7 @@ function spaces_load_entity_spaces($entity_type, $data) {
     ->propertyCondition('entity_id', $wrapper->getIdentifier())
     ->propertyCondition('entity_type', $wrapper->type())
     ->propertyCondition('type', $wrapper->getBundle())
-    ->propertyCondition('status', 1)
+//    ->propertyCondition('status', 1)
     ->execute();
 
   if (empty($result['space'])) {
