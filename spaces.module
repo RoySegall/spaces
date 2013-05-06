@@ -118,15 +118,29 @@ function spaces_context() {
  *  The current context of the user.
  */
 function spaces_determine_context($item = NULL) {
-  if (!$item) {
-    $item = menu_get_item();
+  if (!$enabled = variable_get("spaces_context_spaces")) {
+    return;
   }
 
-  // Get the all the determine context plugins.
+  $item = $item ? $item : menu_get_item();
+
+  // Get all the methods and order them by the weight.
+  $weights = variable_get("spaces_providers_weight_spaces");
+
   $plugins = spaces_get_spaces_styles();
+
+  foreach ($plugins as $id => &$plugin) {
+    if (empty($enabled[$id])) {
+      unset($plugins[$id]);
+    }
+    $plugin['weight'] = $weights[$id];
+  }
+  uasort($plugins, 'drupal_sort_weight');
+
+  // Get the all the determine context plugins.
   $method = NULL;
 
-  foreach ($plugins as $plugin) {
+  foreach ($plugins as $id => $plugin) {
     if (!empty($plugin['path'])) {
       foreach ($plugin['path'] as $path) {
         if (strpos($item['path'], $path) === 0) {
@@ -155,7 +169,7 @@ function spaces_determine_context($item = NULL) {
  * Implements hook_ctools_plugin_api().
  */
 function spaces_ctools_plugin_api($module, $api) {
-  if ($module == 'spaces' && $api == 'spaces_app') {
+  if ($module == 'spaces' && $api == 'spaces_context') {
     return array('version' => 1);
   }
 }
@@ -164,7 +178,7 @@ function spaces_ctools_plugin_api($module, $api) {
  * Implements hook_ctools_plugin_type().
  */
 function spaces_ctools_plugin_type() {
-  $plugins['spaces_app'] = array(
+  $plugins['spaces_context'] = array(
     'classes' => array('class'),
     'process' => 'spaces_plugin_process',
   );
@@ -202,7 +216,7 @@ function spaces_ctools_plugin_directory($module, $plugin) {
  */
 function spaces_get_spaces_style($style_name) {
   ctools_include('plugins');
-  return ctools_get_plugins('spaces', 'spaces_app', $style_name);
+  return ctools_get_plugins('spaces', 'spaces_context', $style_name);
 }
 
 /**
@@ -210,7 +224,7 @@ function spaces_get_spaces_style($style_name) {
  */
 function spaces_get_spaces_styles() {
   ctools_include('plugins');
-  return ctools_get_plugins('spaces', 'spaces_app');
+  return ctools_get_plugins('spaces', 'spaces_context');
 }
 
 /**
@@ -306,7 +320,7 @@ function spaces_load_entity_spaces($entity_type, $data) {
     ->propertyCondition('entity_id', $wrapper->getIdentifier())
     ->propertyCondition('entity_type', $wrapper->type())
     ->propertyCondition('type', $wrapper->getBundle())
-//    ->propertyCondition('status', 1)
+    ->propertyCondition('status', 1)
     ->execute();
 
   if (empty($result['space'])) {
