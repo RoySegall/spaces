@@ -20,15 +20,6 @@ function spaces_init() {
     $space->save();
   }
 
-//  if (!empty($menu['load_functions']) && $menu['load_functions'][1] == 'node_load') {
-//    $spaces = spaces_load_entity_spaces('node', $menu['original_map'][1]);
-//
-//    foreach ($spaces as $space) {
-//      // Overriding the $conf values with the space values.
-//      $conf = drupal_array_merge_deep($conf, $space->settings['variables']);
-//    }
-//  }
-
   // Get the context.
   spaces_context();
 }
@@ -139,30 +130,28 @@ function spaces_determine_context($item = NULL) {
 
   // Get the all the determine context plugins.
   $method = NULL;
-
-  foreach ($plugins as $id => $plugin) {
+  unset($plugin);
+  foreach ($plugins as $plugin) {
     if (!empty($plugin['path'])) {
       foreach ($plugin['path'] as $path) {
         if (strpos($item['path'], $path) === 0) {
           $method = $plugin;
-//          $invoke = TRUE;
-          // Path matches, so we can break.
-          break;
+          break 2;
         }
       }
-    }
-    else {
-      // Context isn't determined by the menu item.
-//      $invoke = TRUE;
     }
   }
 
   // Get the first plugin provider.
   if (!empty($method)) {
-    $value = call_user_func($method['function'], $item);
-
-    return reset($value);
+    $value = call_user_func($method['determine_function'], $item);
   }
+  else {
+    $plugin = reset($plugins);
+    $value = call_user_func($plugin['determine_function'], $item);
+  }
+
+  return reset($value);
 }
 
 /**

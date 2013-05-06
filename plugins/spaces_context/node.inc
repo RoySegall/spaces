@@ -8,7 +8,7 @@ $plugin = array(
   'title' => t('Node'),
   'description' => t('Determine the path by of the node.'),
   'path' => array('node/%'),
-  'function' => 'spaces_context_determine_node',
+  'determine_function' => 'spaces_context_determine_node',
 );
 
 /**
