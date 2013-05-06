@@ -21,7 +21,17 @@ function spaces_init() {
   }
 
   // Get the context.
-  spaces_context();
+  $context = spaces_context();
+
+  if (!$context) {
+    return;
+  }
+
+  $spaces = spaces_load_entity_spaces($context[0], $context[1]);
+
+  foreach ($spaces as $space) {
+    $conf = drupal_array_merge_deep($conf, $space->settings['variables']);
+  }
 }
 
 /**

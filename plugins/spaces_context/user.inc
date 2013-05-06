@@ -7,7 +7,7 @@
 $plugin = array(
   'title' => t('User'),
   'description' => t('Determine the context by the user path.'),
-  'path' => array('user/%', 'user'),
+  'path' => array('user/%'),
   'determine_function' => 'spaces_context_determine_user',
 );
 
