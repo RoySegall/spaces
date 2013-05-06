@@ -21,17 +21,17 @@ function spaces_init() {
   }
 
   $menu = menu_get_item();
-  if (!empty($menu['load_functions']) && $menu['load_functions'][1] == 'node_load') {
-    $spaces = spaces_load_entity_spaces('node', $menu['original_map'][1]);
-
-    foreach ($spaces as $space) {
-      // Overriding the $conf values with the space values.
-      $conf = drupal_array_merge_deep($conf, $space->settings['variables']);
-    }
-  }
+//  if (!empty($menu['load_functions']) && $menu['load_functions'][1] == 'node_load') {
+//    $spaces = spaces_load_entity_spaces('node', $menu['original_map'][1]);
+//
+//    foreach ($spaces as $space) {
+//      // Overriding the $conf values with the space values.
+//      $conf = drupal_array_merge_deep($conf, $space->settings['variables']);
+//    }
+//  }
 
   // Get the context.
-  spaces_context();
+  $context = spaces_context();
 }
 
 /**
@@ -67,19 +67,50 @@ function spaces_context() {
 
   $context = spaces_determine_context();
 
-  return spaces_get_spaces_style($context);
+  return $context;
 }
 
 /**
  * Determine the context of the current space.
  *
  * @param $item
- *   Optional; A menu item that context should be extracted from. If empty
- *   defaults to the current menu item by using menu_get_item().
+ *  Optional; A menu item that context should be extracted from. If empty
+ *  defaults to the current menu item by using menu_get_item().
+ *
+ * @return
+ *  The current context of the user.
  */
 function spaces_determine_context($item = NULL) {
   if (!$item) {
     $item = menu_get_item();
+  }
+
+  // Get the all the determine context plugins.
+  $plugins = spaces_get_spaces_styles();
+  $method = NULL;
+
+  foreach ($plugins as $plugin) {
+    if (!empty($plugin['path'])) {
+      foreach ($plugin['path'] as $path) {
+        if (strpos($item['path'], $path) === 0) {
+          $method = $plugin;
+          $invoke = TRUE;
+          // Path matches, so we can break.
+          break;
+        }
+      }
+    }
+    else {
+      // Context isn't determined by the menu item.
+      $invoke = TRUE;
+    }
+  }
+
+  // Get the first plugin provider.
+  if (!empty($method)) {
+    $value = call_user_func($method['function'], $item);
+
+    return reset($value);
   }
 }
 
