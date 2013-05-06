@@ -20,7 +20,6 @@ function spaces_init() {
     $space->save();
   }
 
-  $menu = menu_get_item();
 //  if (!empty($menu['load_functions']) && $menu['load_functions'][1] == 'node_load') {
 //    $spaces = spaces_load_entity_spaces('node', $menu['original_map'][1]);
 //
@@ -31,7 +30,7 @@ function spaces_init() {
 //  }
 
   // Get the context.
-  $context = spaces_context();
+  spaces_context();
 }
 
 /**
@@ -39,6 +38,25 @@ function spaces_init() {
  */
 function spaces_menu() {
   $items = array();
+
+  $items['admin/config/spaces'] = array(
+    'title' => 'Spaces',
+    'description' => 'Spaces managing.',
+    'position' => 'right',
+    'weight' => -5,
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('administer spaces'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+
+  $items['admin/config/spaces/order_context'] = array(
+    'title' => 'Contexts manage order',
+    'description' => 'Manage order of contexts.',
+    'access arguments' => array('manage spaces context order'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('spaces_configure_form'),
+  );
 
   return $items;
 }
@@ -48,9 +66,28 @@ function spaces_menu() {
  */
 function spaces_permission() {
   return array(
-    'foo' => array(
-      'title' => t('Bar'),
-      'description' => t('bar'),
+    'administer spaces' => array(
+      'title' => t('Manage spaces'),
+      'description' => t('Manage spaces module functionality'),
+    ),
+    'manage spaces context order' => array(
+      'title' => t('Manage spaces context order'),
+      'description' => t('Grant permission for managing the order of the spaces context.'),
+    ),
+    'manage spaces fields' => array(
+      'title' => t('Manage spaces fields'),
+      'description' => t('Grant permission for managing the space entity fields.'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_theme().
+ */
+function spaces_theme() {
+  return array(
+    'spaces_configure_form' => array(
+      'render element' => 'form',
     ),
   );
 }
@@ -94,7 +131,7 @@ function spaces_determine_context($item = NULL) {
       foreach ($plugin['path'] as $path) {
         if (strpos($item['path'], $path) === 0) {
           $method = $plugin;
-          $invoke = TRUE;
+//          $invoke = TRUE;
           // Path matches, so we can break.
           break;
         }
@@ -102,7 +139,7 @@ function spaces_determine_context($item = NULL) {
     }
     else {
       // Context isn't determined by the menu item.
-      $invoke = TRUE;
+//      $invoke = TRUE;
     }
   }
 
@@ -195,6 +232,16 @@ function spaces_entity_info() {
       'bundle keys' => array(
         'bundle' => 'type',
       ),
+      'bundles' => array(
+        'space' => array(
+          'label' => t('Space'),
+          'admin' => array(
+            'path' => 'admin/config/spaces',
+            'real path' => 'admin/config/spaces',
+            'access arguments' => array('manage spaces fields'),
+          ),
+        ),
+      ),
     ),
   );
 
@@ -267,4 +314,182 @@ function spaces_load_entity_spaces($entity_type, $data) {
   }
 
   return spaces_load_multiple(array_keys($result['space']));
+}
+
+/**
+ * Manage the spaces context plugins.
+ */
+function spaces_configure_form() {
+
+  $form = array(
+    '#submit' => array('spaces_configure_form_submit'),
+    '#theme' => 'spaces_configure_form',
+    '#spaces_providers' => spaces_get_spaces_styles(),
+  );
+
+  _spaces_configure_form_table($form);
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save settings'),
+  );
+
+  return $form;
+}
+
+/**
+ * Helper function to build the spaces context plugin manager.
+ */
+function _spaces_configure_form_table(&$form) {
+  $type = 'spaces';
+
+  $table_form = array(
+    '#title' => t('Spaces context detection'),
+    '#tree' => TRUE,
+    '#description' => t('Order of Spaces context detection methods.'),
+    '#spaces_providers' => array(),
+    '#show_operations' => FALSE,
+    'weight' => array('#tree' => TRUE),
+    'enabled' => array('#tree' => TRUE),
+  );
+
+  $spaces_providers = $form['#spaces_providers'];
+  // Enable url and node context handlers by default.
+  $defaults = array('og_context' => -5, 'node' => -4, 'user' => -3);
+  $enabled_providers = variable_get("spaces_context_$type", $defaults);
+  $providers_weight = variable_get("spaces_providers_weight_$type", $defaults);
+
+  // Add missing data to the providers lists.
+  foreach ($spaces_providers as $id => $provider) {
+    if (!isset($providers_weight[$id])) {
+      $providers_weight[$id] = spaces_provider_weight($provider);
+    }
+  }
+
+  // Order providers list by weight.
+  asort($providers_weight);
+
+  foreach ($providers_weight as $id => $weight) {
+    $enabled = !empty($enabled_providers[$id]);
+    $provider = $spaces_providers[$id];
+
+    $table_form['#spaces_providers'][$id] = $provider;
+
+    $table_form['weight'][$id] = array(
+      '#type' => 'weight',
+      '#default_value' => $weight,
+      '#attributes' => array('class' => array("spaces-provider-weight-$type")),
+    );
+
+    $table_form['title'][$id] = array('#markup' => check_plain($provider['title']));
+    $table_form['enabled'][$id] = array('#type' => 'checkbox', '#default_value' => $enabled);
+    $table_form['description'][$id] = array('#markup' => filter_xss_admin($provider['description']));
+
+    $config_op = array();
+    if (isset($provider['config'])) {
+      $config_op = array('#type' => 'link', '#title' => t('Configure'), '#href' => $provider['config']);
+      // If there is at least one operation enabled show the operation column.
+      $table_form['#show_operations'] = TRUE;
+    }
+    $table_form['operation'][$id] = $config_op;
+  }
+
+  $form['spaces'] = $table_form;
+}
+
+/**
+ * Returns HTML for a spaces context configuration form.
+ *
+ * @param $variables
+ *  An associative array containing:
+ *    - form: A render element representing the form.
+ *
+ * @return
+ *  HTML output.
+ */
+function theme_spaces_configure_form($variables) {
+  $form = $variables['form'];
+  $output = '';
+
+  $type = 'spaces';
+  $rows = array();
+  $title = '<label>' . $form[$type]['#title'] . '</label>';
+  $description = '<div class="description">' . $form[$type]['#description'] . '</div>';
+
+  foreach ($form[$type]['title'] as $id => $element) {
+    // Do not take form control structures.
+    if (is_array($element) && element_child($id)) {
+      $row = array(
+        'data' => array(
+          '<strong>' . drupal_render($form[$type]['title'][$id]) . '</strong>',
+          drupal_render($form[$type]['description'][$id]),
+          drupal_render($form[$type]['enabled'][$id]),
+          drupal_render($form[$type]['weight'][$id]),
+        ),
+        'class' => array('draggable'),
+      );
+      if ($form[$type]['#show_operations']) {
+        $row['data'][] = drupal_render($form[$type]['operation'][$id]);
+      }
+      $rows[] = $row;
+    }
+  }
+
+  $header = array(
+    array('data' => t('Detection method')),
+    array('data' => t('Description')),
+    array('data' => t('Enabled')),
+    array('data' => t('Weight')),
+  );
+
+  // If there is at least one operation enabled show the operation column.
+  if ($form[$type]['#show_operations']) {
+    $header[] = array('data' => t('Operations'));
+  }
+
+  $variables = array(
+    'header' => $header,
+    'rows' => $rows,
+    'attributes' => array('id' => "spaces-negotiation-providers-$type"),
+  );
+  $table  = theme('table', $variables);
+  $table .= drupal_render_children($form[$type]);
+
+  drupal_add_tabledrag("spaces-negotiation-providers-$type", 'order', 'sibling', "spaces-provider-weight-$type");
+
+  $output .= '<div class="form-item">' . $title . $description . $table . '</div>';
+
+  $output .= drupal_render_children($form);
+  return $output;
+}
+
+/**
+ * Submit handler for spaces context settings.
+ */
+function spaces_configure_form_submit($form, &$form_state) {
+  $type = 'spaces';
+
+  $enabled_providers = $form_state['values'][$type]['enabled'];
+  $providers_weight = $form_state['values'][$type]['weight'];
+
+  variable_set("spaces_providers_weight_$type", $providers_weight);
+  variable_set("spaces_context_$type", $enabled_providers);
+
+  $form_state['redirect'] = 'admin/config/spaces/order_context';
+  drupal_set_message(t('Spaces contexts settings has been saved.'));
+}
+
+/**
+ * Return the passed spaces context provider weight or a default value.
+ *
+ * @param $provider
+ *   A group context provider data structure.
+ *
+ * @return
+ *   A numeric weight.
+ */
+function spaces_provider_weight($provider) {
+  $default = is_numeric($provider) ? $provider : 0;
+  return isset($provider['weight']) && is_numeric($provider['weight']) ? $provider['weight'] : $default;
 }
