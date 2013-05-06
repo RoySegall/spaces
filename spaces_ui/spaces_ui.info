@@ -1,0 +1,6 @@
+name = "Spaces UI"
+description = "Providing a UI for the spaces module."
+package = "Spaces"
+
+core = 7.x
+dependencies[] = "spaces"
