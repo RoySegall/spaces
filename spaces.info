@@ -5,6 +5,5 @@ package = "Spaces"
 core = 7.x
 dependencies[] = "ctools"
 dependencies[] = "entity"
-dependencies[] = "og"
 
 files[] = includes/spaces.entity.inc
