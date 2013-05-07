@@ -120,7 +120,7 @@ function _spaces_ui_configure_form_table(&$form) {
 
   $spaces_providers = $form['#spaces_providers'];
   // Enable url and node context handlers by default.
-  $defaults = array('og_context' => -5, 'node' => -4, 'user' => -3);
+  $defaults = array('node' => -4, 'user' => -3);
   $enabled_providers = variable_get("spaces_context_$type", $defaults);
   $providers_weight = variable_get("spaces_providers_weight_$type", $defaults);
 
