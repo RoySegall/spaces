@@ -14,9 +14,7 @@ if (module_exists('og_context')) {
 }
 
 function spaces_context_determine_og_context() {
-  $og_context = og_context();
-  if (empty($og_context)) {
-    return array();
+  if ($og_context = og_context()) {
+    return array($og_context['group_type'], array($og_context['gid']));
   }
-  return array($og_context['group_type'], $og_context['gid']);
 }
