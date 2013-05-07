@@ -27,7 +27,7 @@ function spaces_ui_menu() {
     'description' => 'Manage order of contexts.',
     'access arguments' => array('manage spaces context order'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('spaces_configure_form'),
+    'page arguments' => array('spaces_ui_configure_form'),
   );
 
   return $items;
@@ -86,8 +86,8 @@ function spaces_ui_theme() {
 function spaces_ui_configure_form() {
 
   $form = array(
-    '#submit' => array('spaces_configure_form_submit'),
-    '#theme' => 'spaces_configure_form',
+    '#submit' => array('spaces_ui_configure_form_submit'),
+    '#theme' => 'spaces_ui_configure_form',
     '#spaces_providers' => spaces_get_spaces_styles(),
   );
 
