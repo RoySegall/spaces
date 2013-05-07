@@ -10,24 +10,14 @@
  */
 function spaces_init() {
   global $conf;
-  $debug = FALSE;
-  if ($debug) {
-    // Create a space to a article node.
-    $space = spaces_create('article');
-    $space->entity_id = 1;
-    $space->entity_type = 'node';
-    $space->settings['variables'] = array('site_name' => 'foo');
-    $space->save();
-  }
 
-  // Get the context.
-  $context = spaces_context();
-
-  if (!$context) {
+  if (!$space_context = spaces_context()) {
     return;
   }
 
-  $spaces = spaces_load_entity_spaces($context[0], $context[1]);
+  if (!$spaces = spaces_load_entity_spaces($space_context[0], $space_context[1])) {
+    return;
+  }
 
   foreach ($spaces as $space) {
     $conf = drupal_array_merge_deep($conf, $space->settings['variables']);
@@ -201,8 +191,11 @@ function spaces_entity_info() {
  *  Overriding the entity settings.
  * @return Space
  */
-function spaces_create($type, $values = array()) {
+function spaces_create($type, $entity_type, $entity_id, $values = array()) {
   $values['type'] = $type;
+  $values['entity_type'] = $entity_type;
+  $values['entity_id'] = $entity_id;
+
   return entity_create('space', $values);
 }
 

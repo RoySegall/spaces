@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * Example for spaces module.
+ */
+
+/**
+ * Implements hook_node_insert().
+ *
+ * Change the site name according to the viewed node.
+ */
+function spaces_node_insert($node) {
+  $settings['variables'] = array('site_name' => format_string('Spaces example - @title', array('@title' => $node->title)));
+
+  $space = spaces_create('article', 'node', $node->nid);
+  $space->settings = $settings;
+  $space->save();
+}
