@@ -30,6 +30,14 @@ function spaces_ui_menu() {
     'page arguments' => array('spaces_ui_configure_form'),
   );
 
+  $items['node/%node/spaces'] = array(
+    'title' => 'Spaces',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('spaces_ui_apps_manage', 1),
+    'access arguments' => array('administer spaces'),
+    'type' => MENU_LOCAL_TASK,
+  );
+
   return $items;
 }
 
@@ -256,4 +264,89 @@ function spaces_ui_configure_form_submit($form, &$form_state) {
 function spaces_ui_provider_weight($provider) {
   $default = is_numeric($provider) ? $provider : 0;
   return isset($provider['weight']) && is_numeric($provider['weight']) ? $provider['weight'] : $default;
+}
+
+/**
+ * Creating a basic UI for enabling disabling the spaces.
+ */
+function spaces_ui_apps_manage($form, &$form_state, $node) {
+  // Get all the bundles.
+  $form_state['#node'] = $node;
+  $entities = entity_get_info();
+  $form['spaces'] = array(
+    '#tree' => TRUE,
+  );
+  foreach ($entities as $entity_type => $entity) {
+    if (!in_array($entity_type, array('user', 'node'))) {
+      continue;
+    }
+
+    foreach ($entity['bundles'] as $bundle => $info) {
+      $params = array(
+        '@entity-type' => $entity['label'],
+        '@bundle' => $info['label'],
+      );
+
+      $element_name = "spaces[$entity_type:$bundle][status]";
+
+      $states = array(
+        '#states' => array(
+          'visible' => array(
+            ':input[name="' . $element_name . '"]' => array('checked' => TRUE),
+          ),
+        ),
+      );
+
+      $form['spaces']["$entity_type:$bundle"] = array(
+        '#type' => 'fieldset',
+        '#title' => t("@entity-type - @bundle", $params),
+      );
+
+      $form['spaces']["$entity_type:$bundle"]['status'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Enabled'),
+      );
+
+      $form['spaces']["$entity_type:$bundle"]['parent'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Parent space'),
+      ) + $states;
+
+      $form['spaces']["$entity_type:$bundle"]['visibility'] = array(
+        '#type' => 'select',
+        '#title' => t('Visibility'),
+        '#options' => array(
+          1 => t('Public'),
+          2 => t('Private'),
+        ),
+      ) + $states;
+    }
+  }
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Save'),
+    ),
+    'cancel' => array(
+      '#markup' => l(t('Cancel'), url('node/' . $node->nid)),
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Creating the spaces apps.
+ */
+function spaces_ui_apps_manage_submit($form, $form_state) {
+  $spaces = $form_state['values']['spaces'];
+
+  foreach ($spaces as $entity_bundle => $space) {
+    list($entity, $bundle) = explode(":", $entity_bundle);
+  }
+
+  // @TODO: Create/update space.
+  drupal_set_message(t('The spaces settings for @title were saved successfully', array('@title' => $form_state['#node']->title)));
 }
