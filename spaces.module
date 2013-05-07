@@ -50,7 +50,8 @@ function spaces_context() {
  *  The current context of the user.
  */
 function spaces_determine_context($item = NULL) {
-  if (!$enabled = variable_get("spaces_context_spaces")) {
+  $defaults = array('node' => -4, 'user' => -3);
+  if (!$enabled = variable_get("spaces_context_spaces", $defaults)) {
     return;
   }
 
@@ -195,6 +196,10 @@ function spaces_create($type, $entity_type, $entity_id, $values = array()) {
   $values['type'] = $type;
   $values['entity_type'] = $entity_type;
   $values['entity_id'] = $entity_id;
+
+  $values += array(
+    'status' => TRUE,
+  );
 
   return entity_create('space', $values);
 }
