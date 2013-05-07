@@ -7,17 +7,21 @@
 
 /**
  * Implements hook_init().
+ *
+ * Allow spaces to override $conf.
  */
 function spaces_init() {
   global $conf;
 
-  if (!$space_context = spaces_context()) {
+  if (!$spaces_context = spaces_context()) {
     return;
   }
 
-  if (!$spaces = spaces_load_entity_spaces($space_context[0], $space_context[1])) {
-    return;
+  $spaces = array();
+  foreach ($spaces_context as $entity_type => $ids) {
+    $spaces = array_merge($spaces, spaces_load_entity_spaces($entity_type, $ids));
   }
+
 
   foreach ($spaces as $space) {
     $conf = drupal_array_merge_deep($conf, $space->settings['variables']);
@@ -28,15 +32,15 @@ function spaces_init() {
  * Get the current context.
  */
 function spaces_context() {
-  $context = &drupal_static(__FUNCTION__, FALSE);
+  $spaces_context = &drupal_static(__FUNCTION__, FALSE);
 
-  if (!empty($context)) {
-    return $context;
+  if (!empty($spaces_context)) {
+    return $spaces_context;
   }
 
-  $context = spaces_determine_context();
+  $spaces_context = spaces_determine_context();
 
-  return $context;
+  return $spaces_context;
 }
 
 /**
@@ -70,30 +74,19 @@ function spaces_determine_context($item = NULL) {
   }
   uasort($plugins, 'drupal_sort_weight');
 
+  $spaces_context = array();
+
   // Get the all the determine context plugins.
-  $method = NULL;
-  unset($plugin);
   foreach ($plugins as $plugin) {
-    if (!empty($plugin['path'])) {
-      foreach ($plugin['path'] as $path) {
-        if (strpos($item['path'], $path) === 0) {
-          $method = $plugin;
-          break 2;
-        }
-      }
+    if (!$value = call_user_func($plugin['determine_function'])) {
+      continue;
     }
+
+    // @todo: Use plugin to get the function.
+    $spaces_context = array_merge_recursive($spaces_context, $value);
   }
 
-  // Get the first plugin provider.
-  if (!empty($method)) {
-    $value = call_user_func($method['determine_function'], $item);
-  }
-  else {
-    $plugin = reset($plugins);
-    $value = call_user_func($plugin['determine_function'], $item);
-  }
-
-  return reset($value);
+  return $spaces_context;
 }
 
 /**
@@ -238,22 +231,15 @@ function spaces_load_multiple($ids) {
  * @return
  *  All the referenced spaces.
  */
-function spaces_load_entity_spaces($entity_type, $data) {
-  $wrapper = entity_metadata_wrapper($entity_type, $data);
-
+function spaces_load_entity_spaces($entity_type, $ids = array(), $space_bundle = FALSE) {
   // Load all the spaces for the node the user watching.
   $query = new entityFieldQuery();
   $result = $query
     ->entityCondition('entity_type', 'space')
-    ->propertyCondition('entity_id', $wrapper->getIdentifier())
-    ->propertyCondition('entity_type', $wrapper->type())
-    ->propertyCondition('type', $wrapper->getBundle())
+    ->propertyCondition('entity_type', $entity_type)
+    ->propertyCondition('entity_id', $ids, 'IN')
     ->propertyCondition('status', 1)
     ->execute();
 
-  if (empty($result['space'])) {
-    return array();
-  }
-
-  return spaces_load_multiple(array_keys($result['space']));
+  return !empty($result['space']) ? spaces_load_multiple(array_keys($result['space'])) : array();
 }

@@ -13,7 +13,7 @@ if (module_exists('og_context')) {
   );
 }
 
-function spaces_context_determine_og_context($item) {
+function spaces_context_determine_og_context() {
   $og_context = og_context();
   if (empty($og_context)) {
     return array();

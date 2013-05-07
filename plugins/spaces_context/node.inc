@@ -7,7 +7,6 @@
 $plugin = array(
   'title' => t('Node'),
   'description' => t('Determine the path by of the node.'),
-  'path' => array('node/%'),
   'determine_function' => 'spaces_context_determine_node',
 );
 
@@ -20,6 +19,10 @@ $plugin = array(
  * @return
  *  Array holds the entity type and the entity id.
  */
-function spaces_context_determine_node($item) {
-  return array($item['map']);
+function spaces_context_determine_node() {
+  if (!$node = menu_get_object()) {
+    return;
+  }
+
+  return array('node' => array($node->nid));
 }
