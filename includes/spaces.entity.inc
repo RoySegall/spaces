@@ -100,6 +100,7 @@ class Space extends Entity {
     $cache = &drupal_static(__FUNCTION__, array());
 
     $identifier = array(
+      $this->id,
       $plugin_name,
       $options,
     );

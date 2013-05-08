@@ -65,7 +65,7 @@ abstract class SpacesOverrideBase implements SpacesOverrideInterface {
 
   public function get($key, $default_value = NULL) {
     $settings_key = $this->plugin['options']['settings_key'];
-    return !empty($this->space->settings[$settings_key][$key]) ? $this->space->settings[$settings_key][$key] : $default_value;
+    return isset($this->space->settings[$settings_key][$key]) ? $this->space->settings[$settings_key][$key] : $default_value;
   }
   public function set($key, $value) {
     $settings_key = $this->plugin['options']['settings_key'];
