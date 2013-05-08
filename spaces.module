@@ -26,6 +26,32 @@ function spaces_init() {
   foreach ($spaces as $space) {
     $conf = drupal_array_merge_deep($conf, $space->settings['variables']);
   }
+
+  // spaces_invoke_overrides('variables');
+}
+
+/**
+ * @param $plugin_name
+ * @param array $spaces_context
+ */
+function spaces_invoke_overrides($plugin_name, $spaces_context = array()) {
+  $spaces_context = $spaces_context ? $spaces_context : spaces_context();
+  if (!$spaces_context) {
+    return;
+  }
+
+  $spaces = array();
+  foreach ($spaces_context as $entity_type => $ids) {
+    $spaces = array_merge($spaces, spaces_load_entity_spaces($entity_type, $ids));
+  }
+
+  if (!$spaces) {
+    return;
+  }
+
+  foreach ($spaces as $space) {
+    $space->getOverride($plugin_name)->override();
+  }
 }
 
 /**
@@ -64,7 +90,7 @@ function spaces_determine_context($item = NULL) {
   // Get all the methods and order them by the weight.
   $weights = variable_get("spaces_providers_weight_spaces");
 
-  $plugins = spaces_get_spaces_styles();
+  $plugins = spaces_get_spaces_contexts();
 
   foreach ($plugins as $id => &$plugin) {
     if (empty($enabled[$id])) {

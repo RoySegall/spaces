@@ -7,3 +7,4 @@ dependencies[] = "ctools"
 dependencies[] = "entity"
 
 files[] = includes/spaces.entity.inc
+files[] = plugins/spaces_override/abstract.inc

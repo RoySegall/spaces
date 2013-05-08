@@ -89,4 +89,24 @@ class Space extends Entity {
 
     return $this->settings;
   }
+
+  /**
+   * Returns an initialized Space Override plugin.
+   *
+   * @param $plugin_name
+   *   The Spaces Override plugin name.
+   */
+  function getOverride($plugin_name) {
+    if (!$plugin = spaces_get_spaces_override($plugin_name)) {
+      // @todo: Add own exception.
+      throw new Exception(format_string('Spaces override "@name" does not exist.', array('@name' => $plugin_name)));
+    }
+
+    $plugin['options'] = drupal_array_merge_deep($plugin['options'], $options);
+
+    $class = ctools_plugin_load_class('spaces', 'spaces_override', $plugin_name, 'class');
+
+    // @todo: Cache plugin.
+    return new $class($plugin, $this);
+  }
 }
