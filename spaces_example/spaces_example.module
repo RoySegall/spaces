@@ -1,4 +1,10 @@
 <?php
+/**
+ * @file
+ * Code for the Spaces Example feature.
+ */
+
+include_once 'spaces_example.features.inc';
 
 /**
  * @file
@@ -11,9 +17,15 @@
  * Change the site name according to the viewed node.
  */
 function spaces_example_node_insert($node) {
+  $space = spaces_create('variables', 'node', $node->nid);
   $settings['variables'] = array('site_name' => format_string('Spaces example - @title', array('@title' => $node->title)));
+  $space->settings = $settings;
+  $space->save();
 
-  $space = spaces_create('article', 'node', $node->nid);
+  $space = spaces_create('context', 'node', $node->nid);
+  $settings['context'] = array(
+    'spaces_example:reaction:debug' => TRUE,
+  );
   $space->settings = $settings;
   $space->save();
 }
