@@ -97,6 +97,18 @@ class Space extends Entity {
    *   The Spaces Override plugin name.
    */
   function getOverride($plugin_name, $options = array()) {
+    $cache = &drupal_static(__FUNCTION__, array());
+
+    $identifier = array(
+      $plugin_name,
+      $options,
+    );
+    $identifier = serialize($identifier);
+
+    if (!empty($cache[$identifier])) {
+      return $cache[$identifier];
+    }
+
     if (!$plugin = spaces_get_spaces_override($plugin_name)) {
       // @todo: Add own exception.
       throw new Exception(format_string('Spaces override "@name" does not exist.', array('@name' => $plugin_name)));
@@ -106,7 +118,7 @@ class Space extends Entity {
 
     $class = ctools_plugin_load_class('spaces', 'spaces_override', $plugin_name, 'class');
 
-    // @todo: Cache plugin.
-    return new $class($plugin, $this);
+    $cache[$identifier] = new $class($plugin, $this);
+    return $cache[$identifier];
   }
 }
