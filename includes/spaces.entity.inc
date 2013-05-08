@@ -96,7 +96,7 @@ class Space extends Entity {
    * @param $plugin_name
    *   The Spaces Override plugin name.
    */
-  function getOverride($plugin_name) {
+  function getOverride($plugin_name, $options = array()) {
     if (!$plugin = spaces_get_spaces_override($plugin_name)) {
       // @todo: Add own exception.
       throw new Exception(format_string('Spaces override "@name" does not exist.', array('@name' => $plugin_name)));

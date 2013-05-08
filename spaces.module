@@ -11,23 +11,7 @@
  * Allow spaces to override $conf.
  */
 function spaces_init() {
-  global $conf;
-
-  if (!$spaces_context = spaces_context()) {
-    return;
-  }
-
-  $spaces = array();
-  foreach ($spaces_context as $entity_type => $ids) {
-    $spaces = array_merge($spaces, spaces_load_entity_spaces($entity_type, $ids));
-  }
-
-
-  foreach ($spaces as $space) {
-    $conf = drupal_array_merge_deep($conf, $space->settings['variables']);
-  }
-
-  // spaces_invoke_overrides('variables');
+  spaces_invoke_overrides('variables');
 }
 
 /**
