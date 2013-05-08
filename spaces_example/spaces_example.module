@@ -24,7 +24,7 @@ function spaces_example_node_insert($node) {
 
   $space = spaces_create('context', 'node', $node->nid);
   $settings['context'] = array(
-    'foo:reaction:debug' => TRUE,
+    'spaces_example:reaction:debug' => TRUE,
   );
   $space->settings = $settings;
   $space->save();
