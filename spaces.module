@@ -147,7 +147,9 @@ function spaces_context_plugin_process(&$plugin, $info) {
 function spaces_override_plugin_process(&$plugin, $info) {
   $plugin += array(
     'description' => '',
-    'options' => array(),
+    'options' => array(
+      'settings_key' => $plugin['name'],
+    ),
   );
 }
 
