@@ -1,4 +1,10 @@
 <?php
+/**
+ * @file
+ * Code for the Spaces Example feature.
+ */
+
+include_once 'spaces_example.features.inc';
 
 /**
  * @file

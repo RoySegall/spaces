@@ -1,6 +1,9 @@
-name = "Spaces Example"
-description = "Example for spaces module."
-package = "Spaces"
-
+name = Spaces Example
+description = Example for spaces module.
 core = 7.x
-dependencies[] = "spaces"
+package = Spaces
+php = 5.2.4
+dependencies[] = spaces
+features[context][] = spaces_example
+features[ctools][] = context:context:3
+features[features_api][] = api:1
