@@ -88,7 +88,7 @@ function spaces_ui_configure_form() {
   $form = array(
     '#submit' => array('spaces_ui_configure_form_submit'),
     '#theme' => 'spaces_ui_configure_form',
-    '#spaces_providers' => spaces_get_spaces_styles(),
+    '#spaces_providers' => spaces_get_spaces_contexts(),
   );
 
   _spaces_ui_configure_form_table($form);
