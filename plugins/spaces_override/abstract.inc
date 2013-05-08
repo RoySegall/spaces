@@ -40,7 +40,7 @@ interface SpacesOverrideInterface {
   /**
    * Perform the overriding.
    */
-  public function override();
+  public function override(&$data = NULL);
 }
 
 /**
@@ -72,5 +72,5 @@ abstract class SpacesOverrideBase implements SpacesOverrideInterface {
     $this->space->settings[$settings_key][$key] = $value;
 
   }
-  public function override() {}
+  public function override(&$data = NULL) {}
 }

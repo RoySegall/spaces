@@ -15,12 +15,18 @@ function spaces_init() {
 }
 
 /**
+ * Implements hook_context_load_alter().
+ */
+function spaces_context_load_alter(&$context) {
+  spaces_invoke_overrides('context', $context);
+}
+
+/**
  * @param $plugin_name
  * @param array $spaces_context
  */
-function spaces_invoke_overrides($plugin_name, $spaces_context = array()) {
-  $spaces_context = $spaces_context ? $spaces_context : spaces_context();
-  if (!$spaces_context) {
+function spaces_invoke_overrides($plugin_name, &$data = NULL) {
+  if (!$spaces_context = spaces_context()) {
     return;
   }
 
@@ -34,7 +40,7 @@ function spaces_invoke_overrides($plugin_name, $spaces_context = array()) {
   }
 
   foreach ($spaces as $space) {
-    $space->getOverride($plugin_name)->override();
+    $space->getOverride($plugin_name)->override($data);
   }
 }
 
