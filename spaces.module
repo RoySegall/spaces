@@ -291,14 +291,14 @@ function spaces_load_multiple($ids) {
  * @return
  *  All the referenced spaces.
  */
-function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundle = FALSE) {
+function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundle = FALSE, $status = SPACES_SPACE_ENABLED) {
   // Load all the spaces for the node the user watching.
   $query = new entityFieldQuery();
   $query
     ->entityCondition('entity_type', 'space')
     ->propertyCondition('entity_type', $entity_type)
     ->propertyCondition('entity_id', $ids, 'IN')
-    ->propertyCondition('status', SPACES_SPACE_ENABLED)
+    ->propertyCondition('status', $status)
     ->execute();
 
   if ($space_bundle) {
