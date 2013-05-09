@@ -306,7 +306,8 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
       );
 
       // Load an existing OG-vocab, or get default values.
-      $space = spaces_load_space_by_entity($entity_type, array($entity_id), $bundle, array(SPACES_SPACE_DISABLED, SPACES_SPACE_ENABLED), TRUE);
+      $space = spaces_load_space_by_entity($entity_type, array($entity_id), $bundle, array(SPACES_SPACE_ENABLED), TRUE);
+      dpm($space);
       $form['spaces']["$entity_type:$bundle"]['entity'] = array(
         '#type' => 'value',
         '#value' => $space,
@@ -329,7 +330,7 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
 
 
       // Add settings.
-      $form['spaces']["$entity_type:$bundle"]['settings'] = array();
+      $form['spaces']["$entity_type:$bundle"]['settings']['variable'] = array();
 
       foreach (spaces_get_spaces_overrides('variable') as $plugin_name => $plugin) {
         if (!$space->getOverride($plugin_name)->access('form')) {
@@ -338,12 +339,16 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
         }
 
         if ($settings = $space->getOverride($plugin_name)->form(array(), $form_state)) {
-          $form['spaces']["$entity_type:$bundle"]['settings'] = $settings;
+          $form['spaces']["$entity_type:$bundle"]['settings']['variable'] = array_merge($form['spaces']["$entity_type:$bundle"]['settings']['variable'], $settings);
+          $form['spaces']["$entity_type:$bundle"]['settings']['variable']['#overrides'][] = $plugin_name;
         }
       }
 
-      foreach ($form['spaces']["$entity_type:$bundle"]['settings'] as $key => $value) {
-        $form['spaces']["$entity_type:$bundle"]['settings'][$key] += $states;
+      foreach ($form['spaces']["$entity_type:$bundle"]['settings']['variable'] as $key => $value) {
+        if (!element_child($key)) {
+          continue;
+        }
+        $form['spaces']["$entity_type:$bundle"]['settings']['variable'][$key] += $states;
       }
     }
   }
@@ -386,6 +391,7 @@ function spaces_ui_apps_manage_submit($form, $form_state) {
       $space->{$space_property} = $value;
     }
 
+    // @todo: Invoke submit of the override plugins.
     $space->save();
   }
 
