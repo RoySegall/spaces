@@ -176,9 +176,7 @@ function spaces_ctools_plugin_type() {
 }
 
 /**
- * Add defaults values to the notifier plugins.
- *
- * - 'description': The description of the plugin.
+ * Add defaults values to the Space context plugins.
  */
 function spaces_context_plugin_process(&$plugin, $info) {
   $plugin += array(
@@ -188,9 +186,7 @@ function spaces_context_plugin_process(&$plugin, $info) {
 }
 
 /**
- * Add defaults values to the notifier plugins.
- *
- * - 'description': The description of the plugin.
+ * Add defaults values to the Space overrides plugins.
  */
 function spaces_override_plugin_process(&$plugin, $info) {
   $plugin['options'] += array(
