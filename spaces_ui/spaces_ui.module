@@ -315,6 +315,7 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
       $form['spaces']["$entity_type:$bundle"]['status'] = array(
         '#type' => 'checkbox',
         '#title' => t('Enabled'),
+        '#default_value' => empty($space->is_new),
       );
 
       $form['spaces']["$entity_type:$bundle"]['visibility'] = array(
@@ -375,6 +376,13 @@ function spaces_ui_apps_manage_submit($form, $form_state) {
 
   foreach ($spaces as $key => $space_value) {
     $space = $space_value['entity'];
+
+    if (empty($form_state['values']['spaces'][$key]['status']) && !empty($space->id)) {
+      // Delete the Space.
+      $space->delete();
+      continue;
+    }
+
     foreach ($form_state['values']['spaces'][$key] as $space_property => $value) {
       if ($space_property == 'entity') {
         continue;

@@ -63,7 +63,7 @@ function spaces_load_space_by_entity($entity_type, $entity_id, $space_bundle, $s
   }
 
   if ($create_new) {
-    return spaces_create($space_bundle, $entity_type, $id);
+    return spaces_create($space_bundle, $entity_type, $entity_id);
   }
 }
 
