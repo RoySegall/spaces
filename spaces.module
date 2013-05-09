@@ -42,7 +42,7 @@ function spaces_invoke_overrides($plugin_name, &$data = NULL) {
 
   $spaces = array();
   foreach ($spaces_context as $entity_type => $ids) {
-    $spaces = array_merge($spaces, spaces_load_entity_spaces($entity_type, $ids));
+    $spaces = array_merge($spaces, spaces_load_spaces_by_entity($entity_type, $ids));
   }
 
   if (!$spaces) {
@@ -291,7 +291,7 @@ function spaces_load_multiple($ids) {
  * @return
  *  All the referenced spaces.
  */
-function spaces_load_entity_spaces($entity_type, $ids = array(), $space_bundle = FALSE) {
+function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundle = FALSE) {
   // Load all the spaces for the node the user watching.
   $query = new entityFieldQuery();
   $query
