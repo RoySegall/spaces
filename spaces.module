@@ -82,7 +82,7 @@ function spaces_invoke_overrides($plugin_name, &$data = NULL) {
  * Allow spaces to override $conf.
  */
 function spaces_init() {
-  spaces_invoke_overrides('variables');
+  spaces_invoke_overrides('variable');
 }
 
 /**
