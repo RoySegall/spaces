@@ -272,6 +272,8 @@ function spaces_ui_provider_weight($provider) {
 function spaces_ui_apps_manage($form, &$form_state, $node) {
   // Get all the bundles.
   $form_state['#node'] = $node;
+  // @todo: Remove node hardcoding.
+  $entity_id = $node->nid;
   $entities = entity_get_info();
   $form['spaces'] = array(
     '#tree' => TRUE,
@@ -297,20 +299,23 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
         ),
       );
 
+
       $form['spaces']["$entity_type:$bundle"] = array(
         '#type' => 'fieldset',
         '#title' => t("@entity-type - @bundle", $params),
+      );
+
+      // Load an existing OG-vocab, or get default values.
+      $space = spaces_load_spaces_by_entity($entity_type, array($entity_id), $bundle, array(SPACES_SPACE_DISABLED, SPACES_SPACE_ENABLED), TRUE);
+      $form['spaces']["$entity_type:$bundle"]['entity'] = array(
+        '#type' => 'value',
+        '#value' => $space,
       );
 
       $form['spaces']["$entity_type:$bundle"]['status'] = array(
         '#type' => 'checkbox',
         '#title' => t('Enabled'),
       );
-
-      $form['spaces']["$entity_type:$bundle"]['parent'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Parent space'),
-      ) + $states;
 
       $form['spaces']["$entity_type:$bundle"]['visibility'] = array(
         '#type' => 'select',
@@ -325,13 +330,15 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
 
   $form['actions'] = array(
     '#type' => 'actions',
-    'submit' => array(
-      '#type' => 'submit',
-      '#value' => t('Save'),
-    ),
-    'cancel' => array(
-      '#markup' => l(t('Cancel'), url('node/' . $node->nid)),
-    ),
+  );
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  $form['actions']['cancel'] = array(
+    '#markup' => l(t('Cancel'), url('node/' . $node->nid)),
   );
 
   return $form;
@@ -343,9 +350,19 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
 function spaces_ui_apps_manage_submit($form, $form_state) {
   $spaces = $form_state['values']['spaces'];
 
-  foreach ($spaces as $entity_bundle => $space) {
-    list($entity, $bundle) = explode(":", $entity_bundle);
+  foreach ($spaces as $key => $space_value) {
+    $space = $space_value['entity'];
+    foreach ($form_state['values']['spaces'][$key] as $space_property => $value) {
+      if ($space_property == 'entity') {
+        continue;
+      }
+      $space->{$space_property} = $value;
+    }
+
+    $space->save();
   }
+
+
 
   // @TODO: Create/update space.
   drupal_set_message(t('The spaces settings for @title were saved successfully', array('@title' => $form_state['#node']->title)));
