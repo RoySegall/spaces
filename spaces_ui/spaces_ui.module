@@ -318,16 +318,6 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
         '#default_value' => empty($space->is_new),
       );
 
-      $form['spaces']["$entity_type:$bundle"]['visibility'] = array(
-        '#type' => 'select',
-        '#title' => t('Visibility'),
-        '#options' => array(
-          1 => t('Public'),
-          2 => t('Private'),
-        ),
-      ) + $states;
-
-
       // Add settings.
       $form['spaces']["$entity_type:$bundle"]['settings']['variable'] = array();
 
