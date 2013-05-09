@@ -29,3 +29,12 @@ function spaces_example_node_insert($node) {
   $space->settings = $settings;
   $space->save();
 }
+
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function spaces_example_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'spaces') {
+    return 'plugins/' . $plugin;
+  }
+}

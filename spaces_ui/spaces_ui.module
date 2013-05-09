@@ -272,6 +272,8 @@ function spaces_ui_provider_weight($provider) {
 function spaces_ui_apps_manage($form, &$form_state, $node) {
   // Get all the bundles.
   $form_state['#node'] = $node;
+  // @todo: Remove node hardcoding.
+  $entity_id = $node->nid;
   $entities = entity_get_info();
   $form['spaces'] = array(
     '#tree' => TRUE,
@@ -297,20 +299,24 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
         ),
       );
 
+
       $form['spaces']["$entity_type:$bundle"] = array(
         '#type' => 'fieldset',
         '#title' => t("@entity-type - @bundle", $params),
       );
 
+      // Load an existing OG-vocab, or get default values.
+      $space = spaces_load_space_by_entity($entity_type, array($entity_id), $bundle, array(SPACES_SPACE_ENABLED), TRUE);
+      $form['spaces']["$entity_type:$bundle"]['entity'] = array(
+        '#type' => 'value',
+        '#value' => $space,
+      );
+
       $form['spaces']["$entity_type:$bundle"]['status'] = array(
         '#type' => 'checkbox',
         '#title' => t('Enabled'),
+        '#default_value' => empty($space->is_new),
       );
-
-      $form['spaces']["$entity_type:$bundle"]['parent'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Parent space'),
-      ) + $states;
 
       $form['spaces']["$entity_type:$bundle"]['visibility'] = array(
         '#type' => 'select',
@@ -320,18 +326,43 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
           2 => t('Private'),
         ),
       ) + $states;
+
+
+      // Add settings.
+      $form['spaces']["$entity_type:$bundle"]['settings']['variable'] = array();
+
+      foreach (spaces_get_spaces_overrides('variable') as $plugin_name => $plugin) {
+        if (!$space->getOverride($plugin_name)->access('form')) {
+          // No access to the form.
+          continue;
+        }
+
+        if ($settings = $space->getOverride($plugin_name)->form(array(), $form_state)) {
+          $form['spaces']["$entity_type:$bundle"]['settings']['variable'] = array_merge($form['spaces']["$entity_type:$bundle"]['settings']['variable'], $settings);
+          $form['spaces']["$entity_type:$bundle"]['settings']['variable']['#overrides'][] = $plugin_name;
+        }
+      }
+
+      foreach ($form['spaces']["$entity_type:$bundle"]['settings']['variable'] as $key => $value) {
+        if (!element_child($key)) {
+          continue;
+        }
+        $form['spaces']["$entity_type:$bundle"]['settings']['variable'][$key] += $states;
+      }
     }
   }
 
   $form['actions'] = array(
     '#type' => 'actions',
-    'submit' => array(
-      '#type' => 'submit',
-      '#value' => t('Save'),
-    ),
-    'cancel' => array(
-      '#markup' => l(t('Cancel'), url('node/' . $node->nid)),
-    ),
+  );
+
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  $form['actions']['cancel'] = array(
+    '#markup' => l(t('Cancel'), url('node/' . $node->nid)),
   );
 
   return $form;
@@ -343,9 +374,27 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
 function spaces_ui_apps_manage_submit($form, $form_state) {
   $spaces = $form_state['values']['spaces'];
 
-  foreach ($spaces as $entity_bundle => $space) {
-    list($entity, $bundle) = explode(":", $entity_bundle);
+  foreach ($spaces as $key => $space_value) {
+    $space = $space_value['entity'];
+
+    if (empty($form_state['values']['spaces'][$key]['status']) && !empty($space->id)) {
+      // Delete the Space.
+      $space->delete();
+      continue;
+    }
+
+    foreach ($form_state['values']['spaces'][$key] as $space_property => $value) {
+      if ($space_property == 'entity') {
+        continue;
+      }
+      $space->{$space_property} = $value;
+    }
+
+    // @todo: Invoke submit of the override plugins.
+    $space->save();
   }
+
+
 
   // @TODO: Create/update space.
   drupal_set_message(t('The spaces settings for @title were saved successfully', array('@title' => $form_state['#node']->title)));

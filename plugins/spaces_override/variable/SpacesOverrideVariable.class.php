@@ -5,7 +5,7 @@
  * Spaces override for Drupal core variables (i.e. global $conf).
  */
 
-class SpacesOverrideVariables extends SpacesOverrideBase {
+class SpacesOverrideVariable extends SpacesOverrideBase {
 
   public function get($key, $default_value = NULL) {
     if ($value = parent::get($key, NULL)) {
@@ -17,7 +17,9 @@ class SpacesOverrideVariables extends SpacesOverrideBase {
 
   public function override(&$data = NULL) {
     global $conf;
-    $conf = drupal_array_merge_deep($conf, $this->space->settings['variables']);
+    if (!empty($this->space->settings['variable'])) {
+      $conf = drupal_array_merge_deep($conf, $this->space->settings['variable']);
+    }
   }
 
 }

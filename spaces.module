@@ -30,14 +30,14 @@ define('SPACES_SPACE_DISABLED', FALSE);
  * @return
  *  Array of Space objects, or an empty array.
  */
-function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundle = FALSE, $status = SPACES_SPACE_ENABLED) {
+function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundle = FALSE, $status = array(SPACES_SPACE_ENABLED)) {
   // Load all the spaces for the node the user watching.
   $query = new entityFieldQuery();
   $query
     ->entityCondition('entity_type', 'space')
     ->propertyCondition('entity_type', $entity_type)
     ->propertyCondition('entity_id', $ids, 'IN')
-    ->propertyCondition('status', $status)
+    ->propertyCondition('status', $status, 'IN')
     ->execute();
 
   if ($space_bundle) {
@@ -50,14 +50,32 @@ function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundl
 }
 
 /**
+ * Get a single Space of a single entity.
+ * @param $entity_type
+ * @param $entity_id
+ * @param bool $space_bundle
+ * @param array $status
+ * @param bool $create_new
+ */
+function spaces_load_space_by_entity($entity_type, $entity_id, $space_bundle, $status = array(SPACES_SPACE_ENABLED), $create_new = FALSE) {
+  if ($spaces = spaces_load_spaces_by_entity($entity_type, array($entity_id), $space_bundle, $status)) {
+    return reset($spaces);
+  }
+
+  if ($create_new) {
+    return spaces_create($space_bundle, $entity_type, $entity_id);
+  }
+}
+
+/**
  * Invoke Space overrides by a Space override plugin.
  *
- * @param $plugin_name
- *   The Space override plugin name (e.g. variables, context).
+ * @param $type
+ *   The plugin type (e.g. variables, context).
  * @param $data
  *   Optional; variable passed by reference to alter by the Space overriders.
  */
-function spaces_invoke_overrides($plugin_name, &$data = NULL) {
+function spaces_invoke_overrides($type, &$data = NULL) {
   if (!$spaces_context = spaces_context()) {
     return;
   }
@@ -72,7 +90,9 @@ function spaces_invoke_overrides($plugin_name, &$data = NULL) {
   }
 
   foreach ($spaces as $space) {
-    $space->getOverride($plugin_name)->override($data);
+    foreach (array_keys(spaces_get_spaces_overrides($type)) as $plugin_name) {
+      $space->getOverride($plugin_name)->override($data);
+    }
   }
 }
 
@@ -82,7 +102,7 @@ function spaces_invoke_overrides($plugin_name, &$data = NULL) {
  * Allow spaces to override $conf.
  */
 function spaces_init() {
-  spaces_invoke_overrides('variables');
+  spaces_invoke_overrides('variable');
 }
 
 /**
@@ -238,11 +258,21 @@ function spaces_get_spaces_override($plugin_name) {
 }
 
 /**
- * Helper function to include CTools plugins and get all notifier plugins.
+ * Helper function to include CTools plugins and get all Space overrides plugins.
  */
-function spaces_get_spaces_overrides() {
+function spaces_get_spaces_overrides($type = FALSE) {
   ctools_include('plugins');
-  return ctools_get_plugins('spaces', 'spaces_override');
+  $plugins = ctools_get_plugins('spaces', 'spaces_override');
+
+  if ($type) {
+    foreach ($plugins as $plugin_name => $plugin) {
+      if ($plugin['type'] != $type) {
+        unset($plugins[$plugin_name]);
+      }
+    }
+  }
+
+  return $plugins;
 }
 
 /**
