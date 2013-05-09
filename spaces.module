@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Main functionality file for the spaces module.
+ * Main functionality file for the Spaces module.
  */
 
 /**
@@ -28,7 +28,7 @@ define('SPACES_SPACE_DISABLED', FALSE);
  *  Optional; The Space status. Defaults to enabled Spaces.
  *
  * @return
- *  Laoded Space objects, or an empty array.
+ *  Array of Space objects, or an empty array.
  */
 function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundle = FALSE, $status = SPACES_SPACE_ENABLED) {
   // Load all the spaces for the node the user watching.
