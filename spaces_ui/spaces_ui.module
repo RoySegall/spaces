@@ -331,11 +331,7 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
       // Add settings.
       $form['spaces']["$entity_type:$bundle"]['settings'] = array();
 
-      foreach (spaces_get_spaces_overrides() as $plugin_name => $plugin) {
-        if ($plugin['type'] != 'variable') {
-          continue;
-        }
-
+      foreach (spaces_get_spaces_overrides('variable') as $plugin_name => $plugin) {
         if (!$space->getOverride($plugin_name)->access('form')) {
           // No access to the form.
           continue;
