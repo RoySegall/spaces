@@ -325,6 +325,12 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
           2 => t('Private'),
         ),
       ) + $states;
+
+      dpm($space);
+
+      // if ($settings = $space->getOverride('')) {
+        // $form['spaces']["$entity_type:$bundle"]['settings'] = $settings;
+      // }
     }
   }
 

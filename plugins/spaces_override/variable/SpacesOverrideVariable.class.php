@@ -17,7 +17,9 @@ class SpacesOverrideVariable extends SpacesOverrideBase {
 
   public function override(&$data = NULL) {
     global $conf;
-    $conf = drupal_array_merge_deep($conf, $this->space->settings['variables']);
+    if (!empty($this->space->settings['variables'])) {
+      $conf = drupal_array_merge_deep($conf, $this->space->settings['variables']);
+    }
   }
 
 }
