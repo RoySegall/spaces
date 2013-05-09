@@ -41,6 +41,12 @@ interface SpacesOverrideInterface {
    * Perform the overriding.
    */
   public function override(&$data = NULL);
+
+  public function form($form, &$form_state);
+
+  public function formValidate($form, &$form_state);
+
+  public function formSubmit($form, &$form_state);
 }
 
 /**
@@ -73,4 +79,14 @@ abstract class SpacesOverrideBase implements SpacesOverrideInterface {
 
   }
   public function override(&$data = NULL) {}
+
+
+  public function form($form, &$form_state) {
+    return $form;
+  }
+
+  public function formValidate($form, &$form_state) {}
+
+
+  public function formSubmit($form, &$form_state) {}
 }
