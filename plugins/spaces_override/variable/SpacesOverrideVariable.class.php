@@ -5,7 +5,7 @@
  * Spaces override for Drupal core variables (i.e. global $conf).
  */
 
-class SpacesOverrideVariables extends SpacesOverrideBase {
+class SpacesOverrideVariable extends SpacesOverrideBase {
 
   public function get($key, $default_value = NULL) {
     if ($value = parent::get($key, NULL)) {
