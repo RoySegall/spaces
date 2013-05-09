@@ -5,4 +5,5 @@ $plugin = array(
   'description' => t('Spaces override for Context module.'),
   'class' => 'SpacesOverrideContext',
   'options' => array(),
+  'type' => 'context'
 );

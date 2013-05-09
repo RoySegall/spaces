@@ -30,7 +30,7 @@ define('SPACES_SPACE_DISABLED', FALSE);
  * @return
  *  Array of Space objects, or an empty array.
  */
-function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundle = FALSE, $status = array(SPACES_SPACE_ENABLED), $create_new = FALSE) {
+function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundle = FALSE, $status = array(SPACES_SPACE_ENABLED)) {
   // Load all the spaces for the node the user watching.
   $query = new entityFieldQuery();
   $query
@@ -46,13 +46,25 @@ function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundl
 
   $result = $query->execute();
 
-  if (empty($result['space']) && $create_new && $space_bundle && count($ids) == 1) {
-    // Return a new Space object.
-    $id = reset($ids);
-    return spaces_create($space_bundle, $entity_type, $id);
+  return !empty($result['space']) ? spaces_load_multiple(array_keys($result['space'])) : array();
+}
+
+/**
+ * Get a single Space of a single entity.
+ * @param $entity_type
+ * @param $entity_id
+ * @param bool $space_bundle
+ * @param array $status
+ * @param bool $create_new
+ */
+function spaces_load_space_by_entity($entity_type, $entity_id, $space_bundle, $status = array(SPACES_SPACE_ENABLED), $create_new = FALSE) {
+  if ($spaces = spaces_load_spaces_by_entity($entity_type, array($entity_id), $space_bundle, $status)) {
+    return reset($spaces);
   }
 
-  return !empty($result['space']) ? spaces_load_multiple(array_keys($result['space'])) : array();
+  if ($create_new) {
+    return spaces_create($space_bundle, $entity_type, $id);
+  }
 }
 
 /**

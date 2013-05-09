@@ -8,7 +8,18 @@
 
 class SpacesOverrideVariableArticle extends SpacesOverrideVariable {
 
+  /**
+   * Overrides SpacesOverrideVariable::access().
+   *
+   * Return TRUE only if we are in an Article bundle.
+   */
+  public function access($op) {
+    // @todo: Add bundle property.
+    return $this->space->type == 'article';
+  }
+
   public function form($form, &$form_state) {
+    $form = parent::form($form, $form_state);
     $settings_key = $this->plugin['options']['settings_key'];
     $settings = !empty($this->space->settings[$settings_key]) ? $this->space->settings[$settings_key] : array();
 
