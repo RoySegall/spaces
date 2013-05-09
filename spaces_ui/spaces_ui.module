@@ -307,7 +307,6 @@ function spaces_ui_apps_manage($form, &$form_state, $node) {
 
       // Load an existing OG-vocab, or get default values.
       $space = spaces_load_space_by_entity($entity_type, array($entity_id), $bundle, array(SPACES_SPACE_ENABLED), TRUE);
-      dpm($space);
       $form['spaces']["$entity_type:$bundle"]['entity'] = array(
         '#type' => 'value',
         '#value' => $space,
