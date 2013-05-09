@@ -37,9 +37,6 @@ class SpacesOverrideVariableArticle extends SpacesOverrideVariable {
     return $form;
   }
 
-  public function formValidate($form, &$form_state) {}
-
-
   public function formSubmit($form, &$form_state) {
     $settings_key = $this->plugin['options']['settings_key'];
 
