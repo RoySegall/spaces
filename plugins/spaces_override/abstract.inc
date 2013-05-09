@@ -47,6 +47,8 @@ interface SpacesOverrideInterface {
   public function formValidate($form, &$form_state);
 
   public function formSubmit($form, &$form_state);
+
+  public function access($op);
 }
 
 /**
@@ -89,4 +91,8 @@ abstract class SpacesOverrideBase implements SpacesOverrideInterface {
 
 
   public function formSubmit($form, &$form_state) {}
+
+  public function access($op) {
+    return TRUE;
+  }
 }
