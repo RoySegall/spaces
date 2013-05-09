@@ -6,6 +6,16 @@
  */
 
 /**
+ * Define an enabled Space status.
+ */
+define('SPACES_SPACE_ENABLED', TRUE);
+
+/**
+ * Define a disabled Space status.
+ */
+define('SPACES_SPACE_DISABLED', FALSE);
+
+/**
  * Implements hook_init().
  *
  * Allow spaces to override $conf.
@@ -60,22 +70,16 @@ function spaces_context() {
 }
 
 /**
- * Determine the context of the current space.
- *
- * @param $item
- *  Optional; A menu item that context should be extracted from. If empty
- *  defaults to the current menu item by using menu_get_item().
+ * Determine the context of the current page.
  *
  * @return
  *  The current context of the user.
  */
-function spaces_determine_context($item = NULL) {
+function spaces_determine_context() {
   $defaults = array('node' => -4, 'user' => -3);
   if (!$enabled = variable_get("spaces_context_spaces", $defaults)) {
     return;
   }
-
-  $item = $item ? $item : menu_get_item();
 
   // Get all the methods and order them by the weight.
   $weights = variable_get("spaces_providers_weight_spaces");
@@ -290,12 +294,18 @@ function spaces_load_multiple($ids) {
 function spaces_load_entity_spaces($entity_type, $ids = array(), $space_bundle = FALSE) {
   // Load all the spaces for the node the user watching.
   $query = new entityFieldQuery();
-  $result = $query
+  $query
     ->entityCondition('entity_type', 'space')
     ->propertyCondition('entity_type', $entity_type)
     ->propertyCondition('entity_id', $ids, 'IN')
-    ->propertyCondition('status', 1)
+    ->propertyCondition('status', SPACES_SPACE_ENABLED)
     ->execute();
+
+  if ($space_bundle) {
+    $query->entityCondition('bundle', $space_bundle);
+  }
+
+  $result = $query->execute();
 
   return !empty($result['space']) ? spaces_load_multiple(array_keys($result['space'])) : array();
 }
