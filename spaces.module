@@ -16,24 +16,46 @@ define('SPACES_SPACE_ENABLED', TRUE);
 define('SPACES_SPACE_DISABLED', FALSE);
 
 /**
- * Implements hook_init().
+ * Get spaces referencing entities.
  *
- * Allow spaces to override $conf.
+ * @param $entity_type
+ *  The entity type.
+ * @param $ids
+ *   Array of entity IDs.
+ * @param $space_bundle
+ *  Optional; The Space bundle to filter by. Defaults to all bundles.
+ * @param $status
+ *  Optional; The Space status. Defaults to enabled Spaces.
+ *
+ * @return
+ *  Laoded Space objects, or an empty array.
  */
-function spaces_init() {
-  spaces_invoke_overrides('variables');
+function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundle = FALSE, $status = SPACES_SPACE_ENABLED) {
+  // Load all the spaces for the node the user watching.
+  $query = new entityFieldQuery();
+  $query
+    ->entityCondition('entity_type', 'space')
+    ->propertyCondition('entity_type', $entity_type)
+    ->propertyCondition('entity_id', $ids, 'IN')
+    ->propertyCondition('status', $status)
+    ->execute();
+
+  if ($space_bundle) {
+    $query->entityCondition('bundle', $space_bundle);
+  }
+
+  $result = $query->execute();
+
+  return !empty($result['space']) ? spaces_load_multiple(array_keys($result['space'])) : array();
 }
 
 /**
- * Implements hook_context_load_alter().
- */
-function spaces_context_load_alter(&$context) {
-  spaces_invoke_overrides('context', $context);
-}
-
-/**
+ * Invoke Space overrides by a Space override plugin.
+ *
  * @param $plugin_name
- * @param array $spaces_context
+ *   The Space override plugin name (e.g. variables, context).
+ * @param $data
+ *   Optional; variable passed by reference to alter by the Space overriders.
  */
 function spaces_invoke_overrides($plugin_name, &$data = NULL) {
   if (!$spaces_context = spaces_context()) {
@@ -52,6 +74,22 @@ function spaces_invoke_overrides($plugin_name, &$data = NULL) {
   foreach ($spaces as $space) {
     $space->getOverride($plugin_name)->override($data);
   }
+}
+
+/**
+ * Implements hook_init().
+ *
+ * Allow spaces to override $conf.
+ */
+function spaces_init() {
+  spaces_invoke_overrides('variables');
+}
+
+/**
+ * Implements hook_context_load_alter().
+ */
+function spaces_context_load_alter(&$context) {
+  spaces_invoke_overrides('context', $context);
 }
 
 /**
@@ -278,34 +316,4 @@ function spaces_load($id) {
  */
 function spaces_load_multiple($ids) {
   return entity_load('space', $ids);
-}
-
-/**
- * Loading spaces referenced to an entity.
- *
- * @param $entity_type
- *  The entity type.
- * @param $data
- *  The entity object or identifier.
- *
- * @return
- *  All the referenced spaces.
- */
-function spaces_load_spaces_by_entity($entity_type, $ids = array(), $space_bundle = FALSE, $status = SPACES_SPACE_ENABLED) {
-  // Load all the spaces for the node the user watching.
-  $query = new entityFieldQuery();
-  $query
-    ->entityCondition('entity_type', 'space')
-    ->propertyCondition('entity_type', $entity_type)
-    ->propertyCondition('entity_id', $ids, 'IN')
-    ->propertyCondition('status', $status)
-    ->execute();
-
-  if ($space_bundle) {
-    $query->entityCondition('bundle', $space_bundle);
-  }
-
-  $result = $query->execute();
-
-  return !empty($result['space']) ? spaces_load_multiple(array_keys($result['space'])) : array();
 }
